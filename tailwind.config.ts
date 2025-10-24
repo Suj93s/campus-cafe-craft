@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        cafe: {
+          wood: "hsl(var(--cafe-wood))",
+          cream: "hsl(var(--cafe-cream))",
+          gold: "hsl(var(--cafe-gold))",
+          shadow: "hsl(var(--cafe-shadow))",
+        },
+      },
+      fontFamily: {
+        poppins: ['Poppins', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
