@@ -1,14 +1,32 @@
-import { Coffee, ShoppingCart } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Coffee, ShoppingCart, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
 import { CartSidebar } from './CartSidebar';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from './ui/button';
 
 export const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { getTotalItems } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { toast } = useToast();
   const totalItems = getTotalItems();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive",
+      });
+    } else {
+      navigate("/auth");
+    }
+  };
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -57,18 +75,29 @@ export const Header = () => {
             </Link>
           </div>
 
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center gap-2 cafe-accent-button"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            <span className="hidden sm:inline">Cart</span>
-            {totalItems > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
-                {totalItems}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative flex items-center gap-2 cafe-accent-button"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              <span className="hidden sm:inline">Cart</span>
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </nav>
       </header>
 

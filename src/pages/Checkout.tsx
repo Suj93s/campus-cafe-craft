@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, ShoppingBag } from 'lucide-react';
 
 const Checkout = () => {
-  const { cart, getTotalPrice, clearCart } = useCart();
+  const { cart, getTotalPrice } = useCart();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
@@ -40,15 +40,14 @@ const Checkout = () => {
       return;
     }
 
-    // Simulate order placement
-    toast({
-      title: 'Order placed successfully! 🎉',
-      description: `Thank you, ${formData.name}! Your order will be ready soon.`,
+    // Navigate to payment page with form data
+    navigate("/payment", {
+      state: {
+        name: formData.name,
+        rollNumber: formData.rollNumber,
+        hostelBlock: formData.hostelBlock,
+      }
     });
-
-    clearCart();
-    setFormData({ name: '', rollNumber: '', hostelBlock: '' });
-    setTimeout(() => navigate('/'), 2000);
   };
 
   return (
@@ -115,7 +114,7 @@ const Checkout = () => {
                 </div>
 
                 <Button type="submit" className="w-full cafe-accent-button">
-                  Place Order
+                  Proceed to Payment
                 </Button>
               </form>
             </div>
