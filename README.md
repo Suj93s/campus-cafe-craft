@@ -1,73 +1,190 @@
-# Welcome to your Lovable project
+# ☕ Saintgits Café Hub
 
-## Project info
 
-**URL**: https://lovable.dev/projects/5072c9b7-ab02-4391-ba61-d174bfe8cc46
+A full-stack web application designed to streamline online ordering for the Saintgits campus cafe. This project features a real-time menu, a reactive shopping cart, and secure order processing, built with React, Supabase, and Tailwind CSS.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+* **Secure Authentication:** User sign-up and sign-in handled by **Supabase Auth**.
+* **Email Validation:** Restricts registration to **`@saintgits.org`** email addresses only.
+* **Dynamic Menu:** Browse menu items (snacks and beverages) loaded from the Supabase database.
+* **Reactive Shopping Cart:** Add/remove items and see your cart update instantly using React Context.
+* **Responsive UI:** A modern, mobile-first design built with **Tailwind CSS** and custom themeing.
+* **Checkout Flow:** A multi-step process to collect user details (Name, Roll No, Hostel) and proceed to payment.
+* **Secure Order Processing:** Uses a **Supabase Edge Function** (`place-order`) to securely validate and insert order data into the database, preventing client-side tampering.
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5072c9b7-ab02-4391-ba61-d174bfe8cc46) and start prompting.
+This project is built using a modern frontend stack with a Supabase backend.
 
-Changes made via Lovable will be committed automatically to this repo.
+* **Frontend:**
+    * [**React.js (with TypeScript)**](https://reactjs.org/) - A JavaScript library for building user interfaces.
+    * [**React Router**](https://reactrouter.com/) - For client-side routing.
+    * [**Tailwind CSS**](https://tailwindcss.com/) - A utility-first CSS framework.
+    * [**`@tanstack/react-query`**]([https://tanstack.com/query/latest](https://tanstack.com/query/latest)) - For data fetching, caching, and state management.
+    * [**React Context**](https://reactjs.org/docs/context.html) (`useCart`) - For global shopping cart state.
+    * [**lucide-react**](https://lucide.dev/) - For icons.
 
-**Use your preferred IDE**
+* **Backend-as-a-Service (BaaS):**
+    * [**Supabase**](https://supabase.io/)
+        * **Supabase Auth:** Manages user login, registration, and sessions.
+        * **Supabase (PostgreSQL):** The database used to store users, menu items, and orders.
+        * **Supabase Edge Functions:** Serverless functions (e.g., `place-order`) for secure backend logic.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Database Schema
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+The application uses a **Supabase (PostgreSQL)** database. The data is organized into tables:
 
-Follow these steps:
+### 1. `users` (Managed by Supabase Auth)
+Stores user authentication information. Additional user profile data (like `name`) is added to the `auth.users` metadata on sign-up.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+| Column | Data Type | Description |
+| :--- | :--- | :--- |
+| `id` | `uuid` | **Primary Key** (Managed by Supabase Auth) |
+| `email` | `varchar` | User's email (unique) |
+| `role` | `text` | User's role (e.g., `'user'` or `'admin'`) |
+| `raw_user_meta_data` | `jsonb` | Stores additional info like `name` |
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### 2. `menu_items` Table
+Stores all available food and drink items.
 
-# Step 3: Install the necessary dependencies.
-npm i
+| Column | Data Type | Description |
+| :--- | :--- | :--- |
+| `id` | `text` | **Primary Key** (e.g., `'uzhunnu-vada'`) |
+| `name` | `text` | Name of the item (e.g., `'Uzhunnu Vada'`) |
+| `price` | `numeric` | Price of the item (e.g., `10`) |
+| `category` | `text` | Item category (e.g., `'snacks'`, `'beverages'`) |
+| `image_url` | `text` | URL for the item's image |
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+### 3. `orders` Table
+Stores header information for all orders placed by users. This data is collected during checkout.
+
+| Column | Data Type | Description |
+| :--- | :--- | :--- |
+| `order_id` | `uuid` | **Primary Key** |
+| `user_id` | `uuid` | **Foreign Key** (references `auth.users(id)`) |
+| `total_price` | `numeric` | The total cost of the order |
+| `status` | `text` | Current status (e.g., `'Pending'`, `'Completed'`) |
+| `created_at` | `timestamp` | Timestamp when the order was placed |
+| `name` | `text` | User's name from checkout |
+| `roll_number` | `text` | User's roll number from checkout |
+| `hostel_block` | `text` | User's hostel block from checkout |
+
+### 4. `order_items` Table
+A junction table that stores the specific items for each order.
+
+| Column | Data Type | Description |
+| :--- | :--- | :--- |
+| `id` | `uuid` | **Primary Key** |
+| `order_id` | `uuid` | **Foreign Key** (references `orders(order_id)`) |
+| `item_id` | `text` | **Foreign Key** (references `menu_items(id)`) |
+| `quantity` | `integer` | Quantity of this item ordered |
+| `price_at_order` | `numeric` | The price of the item when the order was placed |
+
+## Getting Started
+
+Follow these instructions to get a copy of the project up and running on your local machine.
+
+### Prerequisites
+
+You will need the following tools installed on your system:
+
+* [Node.js (v18.x or later)](https://nodejs.org/en/)
+* [npm](https://www.npmjs.com/) (comes with Node.js)
+* [Git](https://git-scm.com/)
+* [Supabase CLI](https://supabase.com/docs/guides/cli)
+* A [Supabase](https://supabase.com/) account.
+
+### Installation & Setup
+
+1.  **Clone the repository:**
+    ```sh
+    git clone https://github.com/Suj93s/campus-cafe-craft.git
+    cd campus-cafe-craft
+    ```
+
+2.  **Set up Supabase Project:**
+    * Go to your [Supabase Dashboard](https://app.supabase.com/) and create a new project.
+    * Go to the **SQL Editor** and run your SQL scripts to create the `menu_items`, `orders`, and `order_items` tables.
+    * Go to **Settings** > **API**. Find your **Project URL** and **`anon` Public Key**.
+
+3.  **Set up the Frontend (Client):**
+    * Navigate to the `client` directory:
+        ```sh
+        cd client
+        ```
+    * Install frontend dependencies:
+        ```sh
+        npm install
+        ```
+    * Create a `.env.local` file in the `client` directory:
+        ```env
+        # .env.local (in client/ directory)
+        
+        # Supabase Project URL
+        VITE_SUPABASE_URL=YOUR_PROJECT_URL_HERE
+        
+        # Supabase Anon Public Key
+        VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY_HERE
+        ```
+        *Note: Verify these variable names (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`) match what's in your `@/integrations/supabase/client.ts` file.*
+
+4.  **Set up Supabase Edge Functions:**
+    * From the root of the project, link your local project to Supabase:
+        ```sh
+        supabase login
+        supabase link --project-ref YOUR_PROJECT_ID
+        ```
+    * Deploy the `place-order` function (which `Payment.tsx` depends on):
+        ```sh
+        supabase functions deploy place-order
+        ```
+
+5.  **Run the application:**
+    * From the `client` directory, run the frontend development server:
+        ```sh
+        npm run dev
+        ```
+    * The React app should now be running and accessible in your browser (e.g., `http://localhost:5173`).
+
+## Project Structure
+
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/5072c9b7-ab02-4391-ba61-d174bfe8cc46) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+campus-cafe-craft/
+├── client/                 # React Frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── FoodCard.tsx
+│   │   │   └── CartSidebar.tsx
+│   │   ├── contexts/
+│   │   │   └── CartContext.tsx
+│   │   ├── hooks/
+│   │   │   ├── useAuth.tsx
+│   │   │   └── use-toast.ts
+│   │   ├── integrations/
+│   │   │   └── supabase/
+│   │   │       └── client.ts
+│   │   ├── pages/
+│   │   │   ├── Index.tsx
+│   │   │   ├── Auth.tsx
+│   │   │   ├── Checkout.tsx
+│   │   │   ├── Payment.tsx
+│   │   │   └── NotFound.tsx
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   └── index.css
+│   ├── .env.local.example
+│   ├── package.json
+│   └── ...
+│
+├── supabase/               # Supabase backend config
+│   ├── functions/
+│   │   └── place-order/    # Serverless Edge Function
+│   │       └── index.ts
+│   └── ...
+│
+└── README.md               # You are here!
+```
